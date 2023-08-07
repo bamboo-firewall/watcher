@@ -174,7 +174,7 @@ func (w *WatcherRepository) DeleteByID(dbname, coll string, id string) error {
 
 func (w *WatcherRepository) FindDoc(dbname, coll string, id string) (int64, error) {
 	collCon := w.MongoConnect.Database(dbname).Collection(coll)
-	filter := bson.D{{"id", id}}
+	filter := bson.D{{"_id", id}}
 	return collCon.CountDocuments(context.TODO(), filter)
 }
 
