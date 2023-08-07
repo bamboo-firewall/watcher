@@ -52,27 +52,60 @@ func (w *WatcherRepository) Watch(c context.Context, key, dbname string) {
 					json.Unmarshal(event.Kv.Value, &hep)
 					hep.ID = hep.Metadata.UID
 					hep.Metadata.Name = eventKey
-					err := w.InsertDoc(dbname, coll, hep)
+					count, err := w.FindDoc(dbname, coll, hep.ID)
 					if err != nil {
-						fmt.Println("Error write doc", err)
+						fmt.Println("Error find doc", err)
+					}
+					if count >= 1 {
+						err := w.DeleteByID(dbname, coll, hep.ID)
+						if err != nil {
+							fmt.Printf("Error to delete id: %s\n", hep.ID)
+						}
+						fmt.Printf("Deleted id: %s \n", hep.ID)
+					}
+					inErr := w.InsertDoc(dbname, coll, hep)
+					if inErr != nil {
+						fmt.Println("Error write doc", inErr)
 					}
 				}
 				if coll == globalNetworkSets {
 					json.Unmarshal(event.Kv.Value, &gns)
 					gns.ID = gns.Metadata.UID
 					gns.Metadata.Name = eventKey
-					err := w.InsertDoc(dbname, coll, gns)
+					count, err := w.FindDoc(dbname, coll, gns.ID)
 					if err != nil {
-						fmt.Println("Error write doc", err)
+						fmt.Println("Error find doc", err)
+					}
+					if count >= 1 {
+						err := w.DeleteByID(dbname, coll, gns.ID)
+						if err != nil {
+							fmt.Printf("Error to delete id: %s\n", gns.ID)
+						}
+						fmt.Printf("Deleted id: %s \n", gns.ID)
+					}
+					inErr := w.InsertDoc(dbname, coll, gns)
+					if inErr != nil {
+						fmt.Println("Error write doc", inErr)
 					}
 				}
 				if coll == globalNetworkPolicies {
 					json.Unmarshal(event.Kv.Value, &gnp)
 					gnp.ID = gnp.Metadata.UID
 					gnp.Metadata.Name = eventKey
-					err := w.InsertDoc(dbname, coll, &gnp)
+					count, err := w.FindDoc(dbname, coll, gnp.ID)
 					if err != nil {
-						fmt.Println("Error write doc", err)
+						fmt.Println("Error find doc", err)
+					}
+					if count >= 1 {
+						err := w.DeleteByID(dbname, coll, gnp.ID)
+						if err != nil {
+							fmt.Printf("Error to delete id: %s\n", gnp.ID)
+						}
+						fmt.Printf("Deleted id: %s \n", gnp.ID)
+					}
+					inErr := w.InsertDoc(dbname, coll, gnp)
+					if inErr != nil {
+						fmt.Println("Error write doc", inErr)
 					}
 				}
 			}
@@ -129,6 +162,20 @@ func (w *WatcherRepository) InsertDoc(dbname, coll string, data interface{}) err
 	}
 	log.Printf("document id: %s inserted\n", res.InsertedID)
 	return nil
+}
+
+func (w *WatcherRepository) DeleteByID(dbname, coll string, id string) error {
+	collCon := w.MongoConnect.Database(dbname).Collection(coll)
+	filter := bson.D{{"_id", id}}
+
+	_, err := collCon.DeleteOne(context.TODO(), filter)
+	return err
+}
+
+func (w *WatcherRepository) FindDoc(dbname, coll string, id string) (int64, error) {
+	collCon := w.MongoConnect.Database(dbname).Collection(coll)
+	filter := bson.D{{"_id", id}}
+	return collCon.CountDocuments(context.TODO(), filter)
 }
 
 func (w *WatcherRepository) DeleteDoc(dbname, coll string, name string) error {
