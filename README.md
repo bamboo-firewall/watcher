@@ -36,6 +36,6 @@ Calico watcher will monitor changing on etcd cluster and update to mongodb datab
 ```
 - Run
 ```shell
-./calico_watcher --> to run daemon
-./calico_watcher_migration --> to migrate exits data from etcd to mongodb
+./watcher --> to run daemon
+./watcher_migration --> to migrate exits data from etcd to mongodb
 ```
